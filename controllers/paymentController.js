@@ -7,6 +7,8 @@ const calculateTotal = require('../utils/calculateTotal');
 const processPayment = async (req, res) => {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    console.log('Stripe Secret Key:', process.env.STRIPE_SECRET_KEY);
+
     const { token, amount, items, address, deliveryDate, deliveryType } = req.body;
 
     console.log('🧾 Payment Request:', { token, amount, address, items });
@@ -72,7 +74,7 @@ const processPayment = async (req, res) => {
       console.log('🧹 Cart cleared');
     }
 
-    res.json({ success: true, charge });
+    res.json({ success: true, charge, orderId: order._id });
 
   } catch (err) {
     console.error('Stripe Payment Error:', err.message);

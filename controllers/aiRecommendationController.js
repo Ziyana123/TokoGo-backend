@@ -1,16 +1,18 @@
+
 const AIRecommendation = require('../models/AIRecommendation');
 const Product = require('../models/Product');
+const SmartPack = require('../models/TravelPack');
 
 exports.generateRecommendation = async (req, res) => {
   try {
-    const { preferences, destination } = req.body;
+    const travelPack = await TravelPack.findOne({ user: req.user._id }).sort({ createdAt: -1 });
 
-    console.log('Received body:', req.body);
-    if (!destination || !Array.isArray(preferences)) {
-      return res.status(400).json({ error: 'Invalid input: destination and preferences required' });
+    if (!travelPack || !Array.isArray(travelPack.preferences)) {
+      return res.status(404).json({ error: 'No valid Smart Pack with preferences found.' });
     }
 
-    const regexTags = preferences.map(tag => new RegExp(`^${tag}$`, 'i'));
+    const regexTags = travelPack.preferences.map(tag => new RegExp(`^${tag}$`, 'i'));
+    
     const products = await Product.find({
       tags: { $in: regexTags }
     }).limit(6);
@@ -19,19 +21,25 @@ exports.generateRecommendation = async (req, res) => {
       return res.status(404).json({ message: 'No matching recommendations found.' });
     }
 
-    const recommendation = new AIRecommendation({
-      userId: req.user._id,
-      recommendedItems: products.map(p => p._id),
-      reason: `Matched preferences: ${preferences.join(', ')}`
-    });
-
-    await recommendation.save();
+    const recommendation = await AIRecommendation.findOneAndUpdate(
+      { userId: req.user._id },
+      {
+        userId: req.user._id,
+        recommendedItems: products.map(p => p._id),
+        reason: `Matched preferences: ${travelPack.preferences.join(', ')}`
+      },
+      { upsert: true, new: true }
+    );
 
     res.status(201).json({ message: 'Recommendation generated', recommendation, products });
   } catch (error) {
+    console.error('Recommendation generation failed:', error);
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
 
 // Get user's recommendations
 exports.getMyRecommendations = async (req, res) => {

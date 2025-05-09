@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const TravelPack = require('../models/TravelPack');
+const AIRecommendation = require('../models/AIRecommendation');
 
 exports.buildSmartPack = async (req, res) => {
   try {
@@ -20,7 +21,7 @@ exports.buildSmartPack = async (req, res) => {
 
     // Create smart pack
     const travelPack = new TravelPack({
-      userId:  req.user._id,
+      userId: req.user._id,
       destination,
       travelDates,
       preferences,
@@ -29,6 +30,16 @@ exports.buildSmartPack = async (req, res) => {
     });
 
     await travelPack.save();
+
+    if (matchedProducts.length) {
+      const recommendation = new AIRecommendation({
+        userId: req.user._id,
+        recommendedItems: matchedProducts.map(p => p._id),
+        reason: `Matched preferences: ${preferences.join(', ')}`
+      });
+
+      await recommendation.save();
+    }
 
     res.status(201).json({
       message: "Smart Travel Pack created successfully",
@@ -43,7 +54,7 @@ exports.buildSmartPack = async (req, res) => {
 // Get all smart packs for user
 exports.getMySmartPacks = async (req, res) => {
   try {
-    const travelPack = await TravelPack.find({ userId:  req.user._id}).populate('items');
+    const travelPack = await TravelPack.find({ userId: req.user._id }).populate('items');
     res.json(travelPack);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -55,7 +66,7 @@ exports.updateTravelPack = async (req, res) => {
     const { destination, travelDates, preferences } = req.body;
 
     const updatedPack = await TravelPack.findOneAndUpdate(
-      { _id: packId, userId:  req.user._id },
+      { _id: packId, userId: req.user._id },
       { destination, travelDates, preferences },
       { new: true }
     ).populate('items');
@@ -73,7 +84,7 @@ exports.deleteTravelPack = async (req, res) => {
   try {
     const packId = req.params.id;
 
-    const deleted = await TravelPack.findOneAndDelete({ _id: packId, userId:  req.user._id });
+    const deleted = await TravelPack.findOneAndDelete({ _id: packId, userId: req.user._id });
 
     if (!deleted) {
       return res.status(404).json({ message: 'Travel pack not found' });
@@ -91,7 +102,7 @@ exports.getTravelPackById = async (req, res) => {
 
     const travelPack = await TravelPack.findOne({
       _id: packId,
-      userId:  req.user._id
+      userId: req.user._id
     }).populate('items');
 
     if (!travelPack) {
