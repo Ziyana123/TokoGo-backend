@@ -19,5 +19,7 @@ router.get('/admins/all', authMiddleware, isAdmin, scheduleController.getAllSche
 router.put('/admins/:id/status', authMiddleware, isAdmin, scheduleController.updateScheduleStatus);
 
 router.delete('/admins/:id' , authMiddleware , isAdmin , scheduleController.deleteSchedule);
+router.put('/admins/cancel/:id', authMiddleware, isAdmin, scheduleController.adminCancelSchedule);
+
 
 module.exports = router;

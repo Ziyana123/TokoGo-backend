@@ -101,3 +101,27 @@ exports.deleteSchedule = async (req, res) => {
   await Schedule.findByIdAndDelete(req.params.id);
   res.json({ message: "Schedule deleted" });
 };
+// Admin: Cancel any user's scheduled delivery
+exports.adminCancelSchedule = async (req, res) => {
+  try {
+    const schedule = await Schedule.findById(req.params.id);
+
+    if (!schedule) return res.status(404).json({ message: "Schedule not found" });
+
+    if (schedule.status === "Cancelled") {
+      return res.status(400).json({ message: "Schedule is already cancelled" });
+    }
+
+    if (schedule.status !== "Scheduled") {
+      return res.status(400).json({ message: "Only 'Scheduled' deliveries can be cancelled" });
+    }
+
+    schedule.status = "Cancelled";
+    await schedule.save();
+
+    res.status(200).json({ message: "Schedule cancelled by admin" });
+  } catch (error) {
+    console.error("Admin cancel error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
