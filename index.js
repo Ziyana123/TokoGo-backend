@@ -19,15 +19,21 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const contactRoutes = require("./routes/contactRoutes");
 const cors = require('cors');
 
+const allowedOrigins = [
+  'https://toko-go-frontend-ko1d.vercel.app',  // your deployed frontend
+  'http://localhost:5173',      // local frontend for development
+];
+
 
 connectDB(); 
 
 const app = express();
 
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-   origin: ['https://toko-go-frontend-ko1d.vercel.app'],
+   origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
