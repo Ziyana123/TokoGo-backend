@@ -20,8 +20,8 @@ const contactRoutes = require("./routes/contactRoutes");
 const cors = require('cors');
 
 const allowedOrigins = [
-  'https://toko-go-frontend-ko1d.vercel.app',  // your deployed frontend
-  'http://localhost:5173',      // local frontend for development
+  'https://toko-go-frontend-ko1d.vercel.app',  
+  'http://localhost:5173',      
 ];
 
 
@@ -53,7 +53,7 @@ app.use('/api/contact', contactRoutes);
 
 
 
-require('./cron/scheduleReminder');
+// require('./cron/scheduleReminder');
 
 
 const PORT = process.env.PORT || 5000;

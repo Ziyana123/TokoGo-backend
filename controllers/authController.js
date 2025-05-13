@@ -40,9 +40,9 @@ exports.login = async (req, res) => {
         const token = generateToken(user);
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Use true in production
-            sameSite: 'strict', // Prevents cross-site request forgery
-            maxAge: 24 * 60 * 60 * 1000, // 1 day expiration
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'None', 
+            maxAge: 24 * 60 * 60 * 1000, 
         });
 
         res.json({
